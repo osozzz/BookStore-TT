@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Selecciona una opción de entrega</h2>
+
+{% if providers %}
+<form method="POST">
+    <div class="mb-3">
+        <label for="provider" class="form-label">Proveedor</label>
+        <select class="form-select" id="provider_id" name="provider_id" required>
+            {% for provider in providers %}
+                <option value="{{ provider.id }}">{{ provider.name }} - {{ provider.contact }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="d-grid">
+        <button type="submit" class="btn btn-primary">Confirmar Entrega</button>
+    </div>
+</form>
+{% else %}
+    <p>No hay proveedores disponibles actualmente.</p>
+{% endif %}
+
+{% endblock %}

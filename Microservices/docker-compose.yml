@@ -1,0 +1,124 @@
+services:
+  auth-db:
+    image: mysql:8.0
+    container_name: auth-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: authdb
+      MYSQL_USER: auth_user
+      MYSQL_PASSWORD: auth_pass
+    ports:
+      - "3308:3306"  # O puedes mapear a otro puerto externo, como 3308
+    volumes:
+      - auth_db_data:/var/lib/mysql
+    networks:
+      - bookstore-net
+    
+  catalog-db:
+    image: mysql:8.0
+    container_name: catalog-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: catalogdb
+      MYSQL_USER: catalog_user
+      MYSQL_PASSWORD: catalog_pass
+    ports:
+      - "3309:3306"
+    volumes:
+      - catalog_db_data:/var/lib/mysql
+    networks:
+      - bookstore-net
+  
+  order-db:
+    image: mysql:8.0
+    container_name: order-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: orderdb
+      MYSQL_USER: order_user
+      MYSQL_PASSWORD: order_pass
+    ports:
+      - "3310:3306"
+    volumes:
+      - order_db_data:/var/lib/mysql
+    networks:
+      - bookstore-net
+
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: auth-service
+    env_file:
+      - ./auth-service/.env
+    ports:
+      - "5000:5000"
+    depends_on:
+      - auth-db
+    networks:
+      - bookstore-net
+
+  catalog-service:
+    build:
+      context: ./catalog-service
+    container_name: catalog-service
+    env_file:
+      - ./catalog-service/.env
+    ports:
+      - "5001:5001"
+    depends_on:
+      - catalog-db
+    networks:
+      - bookstore-net
+
+  order-service:
+    build:
+      context: ./order-service
+    container_name: order-service
+    env_file:
+      - ./order-service/.env
+    ports:
+      - "5002:5002"
+    depends_on:
+      - order-db
+    networks:
+      - bookstore-net
+  
+  admin-service:
+    build:
+      context: ./admin-service
+    container_name: admin-service
+    env_file:
+      - ./admin-service/.env
+    ports:
+      - "5003:5003"
+    depends_on:
+      - auth-db
+    networks:
+      - bookstore-net
+  
+  web-service:
+    build:
+      context: ./web-service
+    container_name: web-service
+    env_file:
+      - ./web-service/.env
+    ports:
+      - "8000:5000"
+    depends_on:
+      - auth-service
+      - catalog-service
+      - order-service
+      - admin-service
+    networks:
+      - bookstore-net
+  
+networks:
+  bookstore-net:
+
+volumes:
+  auth_db_data:
+  catalog_db_data:
+  order_db_data:

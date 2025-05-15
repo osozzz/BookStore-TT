@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Catálogo de Libros</h2>
+
+{% if books %}
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for book in books %}
+        <tr>
+            <td>{{ book.title }}</td>
+            <td>{{ book.author }}</td>
+            <td>{{ book.description }}</td>
+            <td>${{ book.price }}</td>
+            <td>{{ book.stock }}</td>
+            <td>
+                {% if session.get("token") %}
+                <form method="POST" action="{{ url_for('order.buy_book', book_id=book.id) }}" style="display:inline-block;">
+                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="price" value="{{ book.price }}">
+                    <button type="submit" class="btn btn-sm btn-success">Comprar</button>
+                </form>
+                {% else %}
+                <span class="text-muted">Inicia sesión para comprar</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No hay libros disponibles.</p>
+{% endif %}
+{% endblock %}
